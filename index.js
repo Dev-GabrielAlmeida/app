@@ -1,19 +1,46 @@
-const { select, input } = require('@inquirer/prompts'); 
+const { select, input, checkbox } = require('@inquirer/prompts');
 
 const metas = [];
 
 const cadastrarMeta = async () => {
-    const meta = await input({ message: "| Digite a meta: "});
+    const meta = await input({ message: "| Digite a meta: " });
 
-    if(meta.length == 0) {
+    if (meta.length == 0) {
         console.log("A meta NÃO pode ser vazia.");
-        return
+        return;
     }
 
     metas.push(
-        {value: meta, checked: false}
+        { value: meta, checked: false }
     );
 
+};
+
+const listarMetas = async () => {
+    const respostas = await checkbox({
+        message: "Use as setas para mudar de meta, o espaço para marcar ou desmarcar e o enter para finalizar essa etapa.",
+        choices: [...metas],
+        instructions: false
+    });
+
+    if (respostas.length == 0) {
+        console.log("Nenhuma meta selecionada.");
+        return;
+    }
+
+    metas.forEach((m) => {
+        m.checked = false;
+    });
+
+    respostas.forEach((resposta) => {
+        const meta = metas.find((m) => {
+            return m.value == resposta;
+        });
+
+        meta.checked = true;
+    });
+
+    console.log("Meta(s) concluída(s)")
 };
 
 const start = async () => {
@@ -36,21 +63,22 @@ const start = async () => {
                     value: "Sair"
                 }
             ]
-        }); 
-        
+        });
+
         switch (opcao) {
             case "Cadastrar":
                 await cadastrarMeta();
-                console.log(metas);
-            break;
+                console.log("Meta cadastrada com sucesso.")
+                break;
 
             case "Listar":
+                await listarMetas();
                 console.log("Vamos listar.");
-            break;
+                break;
 
             case "Sair":
                 console.log("Até a próxima =)")
-                return
+                return;
         };
     };
 };
